@@ -12,8 +12,10 @@
         "fideloper/proxy": "^4.2",
         "fruitcake/laravel-cors": "^1.0",
         "guzzlehttp/guzzle": "^6.3",
+        "laravel-doctrine/orm": "^1.6",
         "laravel/framework": "^7.0",
-        "laravel/tinker": "^2.0"
+        "laravel/tinker": "^2.0",
+        "ramsey/uuid-doctrine": "^1.6"
     },
     "require-dev": {
         "facade/ignition": "^2.0",
