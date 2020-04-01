@@ -13,13 +13,13 @@ class FullName
      * @var string
      * @ORM\Column(type="string")
      */
-    private string $first_name;
+    private $first_name;
 
     /**
      * @var string
      * @ORM\Column(type="string")
      */
-    private string $last_name;
+    private $last_name;
 
     /**
      * FullName constructor.

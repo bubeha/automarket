@@ -19,7 +19,7 @@ abstract class Entity
      * @ORM\Column(type="uuid", unique=true)
      * @ORM\GeneratedValue(strategy="NONE")
      */
-    protected UuidInterface $id;
+    protected $id;
 
     /**
      * Entity constructor.

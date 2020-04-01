@@ -5,7 +5,10 @@ namespace App\Domain\Entities;
 use App\Domain\ValueObjects\Email;
 use App\Domain\ValueObjects\FullName;
 use Doctrine\ORM\Mapping as ORM;
+use Illuminate\Contracts\Auth\Authenticatable;
+use LaravelDoctrine\ORM\Auth\Authenticatable as AuthenticatableTrait;
 use Ramsey\Uuid\UuidInterface;
+use Tymon\JWTAuth\Contracts\JWTSubject;
 
 /**
  * Class User
@@ -13,25 +16,21 @@ use Ramsey\Uuid\UuidInterface;
  * @ORM\Entity
  * @ORM\Table(name="users")
  */
-class User extends Entity
+class User extends Entity implements Authenticatable, JWTSubject
 {
+    use AuthenticatableTrait;
+
     /**
      * @var FullName
-     * @ORM\Embedded(class="App\domain\ValueObjects\FullName", columnPrefix=false)
+     * @ORM\Embedded(class="App\Domain\ValueObjects\FullName", columnPrefix=false)
      */
-    protected FullName $fullName;
+    protected $fullName;
 
     /**
      * @var Email
      * @ORM\Embedded(class="App\Domain\ValueObjects\Email", columnPrefix=false)
      */
-    private Email $email;
-
-    /**
-     * @var string
-     * @ORM\Column(type="string", length=255)
-     */
-    private string $password;
+    private $email;
 
     /**
      * User constructor.
@@ -51,5 +50,21 @@ class User extends Entity
         $this->fullName = $fullName;
         $this->email = $email;
         $this->password = $password;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getJWTIdentifier()
+    {
+        return $this->id;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getJWTCustomClaims()
+    {
+        return [];
     }
 }

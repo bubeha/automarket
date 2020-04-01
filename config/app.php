@@ -166,6 +166,7 @@ return [
          * Package Service Providers...
          */
         LaravelDoctrine\ORM\DoctrineServiceProvider::class,
+        Tymon\JWTAuth\Providers\LaravelServiceProvider::class,
 
         /*
          * Application Service Providers...

@@ -1,7 +1,6 @@
 <?php
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
+use Illuminate\Contracts\Routing\Registrar;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,6 +13,26 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
+//Route::middleware('auth:api')->get('/user', function (Request $request) {
+//    return $request->user();
+//});
+
+
+/**
+ * @var Registrar $router
+ */
+
+$router->group([
+    'prefix' => 'auth',
+], static function (Registrar $router) {
+    $router->post('login', 'Auth\AuthController@login');
+    $router->post('logout', 'Auth\AuthController@logout');
+    $router->post('refresh', 'Auth\AuthController@refresh');
+    $router->post('me', 'Auth\AuthController@me');
+});
+
+$router->group([
+    'middleware' => 'auth:api',
+], static function (Registrar $router) {
+
 });
