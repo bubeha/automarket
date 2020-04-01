@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginRequest;
 use App\Services\AuthService;
+use Illuminate\Http\JsonResponse;
 
 /**
  * Class AuthController
@@ -25,9 +26,9 @@ class AuthController extends Controller
 
     /**
      * @param LoginRequest $request
-     * @return array
+     * @return JsonResponse
      */
-    public function login(LoginRequest $request): array
+    public function login(LoginRequest $request): JsonResponse
     {
         $credentials = $request->validated();
         $credentials['email.email'] = $credentials['email'];
