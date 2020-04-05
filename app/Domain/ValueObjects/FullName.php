@@ -13,13 +13,13 @@ class FullName
      * @var string
      * @ORM\Column(type="string")
      */
-    private string $first_name;
+    private $first_name;
 
     /**
      * @var string
      * @ORM\Column(type="string")
      */
-    private string $last_name;
+    private $last_name;
 
     /**
      * FullName constructor.
@@ -30,5 +30,29 @@ class FullName
     {
         $this->first_name = $firstName;
         $this->last_name = $lastName;
+    }
+
+    /**
+     * @return string
+     */
+    public function getFirstName(): string
+    {
+        return $this->first_name;
+    }
+
+    /**
+     * @return string
+     */
+    public function getLastName(): string
+    {
+        return $this->last_name;
+    }
+
+    /**
+     * @return string
+     */
+    public function __toString()
+    {
+        return "{$this->getFirstName()} {$this->getLastName()}";
     }
 }

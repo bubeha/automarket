@@ -1,0 +1,25 @@
+GET {{ host }}
+Content-Type: application/json
+Cookie: XDEBUG_SESSION=PHPSTORM
+
+###
+
+POST {{ host }}/api/auth/login
+Content-Type: application/json
+X-Requested-With: XMLHttpRequest
+Cookie: XDEBUG_SESSION=PHPSTORM
+
+{
+    "email": "{{ login }}",
+    "password": "{{ password}}"
+}
+
+###
+
+GET {{ host }}/api/auth/user
+Content-Type: application/json
+X-Requested-With: XMLHttpRequest
+Authorization: {{ tokenType }} {{ token}}
+Cookie: XDEBUG_SESSION=PHPSTORM
+
+###

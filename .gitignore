@@ -13,3 +13,6 @@ yarn-error.log
 
 /.idea
 _ide_helper.php
+.phpstorm.meta.php
+
+http-client.private.env.json
