@@ -67,4 +67,34 @@ class User extends Entity implements Authenticatable, JWTSubject
     {
         return [];
     }
+
+    /**
+     * @return FullName
+     */
+    public function getFullName(): string
+    {
+        return (string)$this->fullName;
+    }
+
+    /**
+     * @return string
+     */
+    public function getEmail(): string
+    {
+        return (string)$this->email;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function toArray()
+    {
+        return [
+            'id' => $this->getId(),
+            'full_name' => $this->getFullName(),
+            'first_name' => $this->fullName->getFirstName(),
+            'last_name' => $this->fullName->getLastName(),
+            'email' => $this->getEmail(),
+        ];
+    }
 }

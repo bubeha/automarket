@@ -74,4 +74,27 @@ class AuthService
             'expires_in' => $minutes * 60,
         ], 200);
     }
+
+    /**
+     * @return JsonResponse
+     */
+    public function logout(): JsonResponse
+    {
+        $this->guard
+            ->logout();
+
+        return $this->response->json([
+            'message' => $this->translator->get('auth.logout'),
+        ]);
+    }
+
+    /**
+     * @return JsonResponse
+     */
+    public function refreshToken(): JsonResponse
+    {
+        $token = $this->guard->refresh();
+
+        return $this->respondWithToken($token, $this->guard->factory()->getTTL());
+    }
 }

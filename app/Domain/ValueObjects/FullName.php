@@ -31,4 +31,28 @@ class FullName
         $this->first_name = $firstName;
         $this->last_name = $lastName;
     }
+
+    /**
+     * @return string
+     */
+    public function getFirstName(): string
+    {
+        return $this->first_name;
+    }
+
+    /**
+     * @return string
+     */
+    public function getLastName(): string
+    {
+        return $this->last_name;
+    }
+
+    /**
+     * @return string
+     */
+    public function __toString()
+    {
+        return "{$this->getFirstName()} {$this->getLastName()}";
+    }
 }
