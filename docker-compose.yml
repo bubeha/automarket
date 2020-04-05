@@ -26,7 +26,8 @@ services:
     depends_on:
       - postgres
     environment:
-      XDEBUG_CONFIG: "remote_host=192.166.220.1 remote_enable=1"
+      XDEBUG_IDE_KEY: "PHPSTORM"
+      XDEBUG_REMOTE_HOST: "192.166.220.1"
       PHP_IDE_CONFIG: "serverName=Docker"
 
   cli:

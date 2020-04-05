@@ -9,8 +9,11 @@ RUN apt-get update && apt-get install -y libpq-dev unzip \
     && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 
-COPY php/xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
+ADD php/default.ini /usr/local/etc/php/conf.d/default.ini
+ADD php/xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
 
 ENV COMPOSER_ALLOW_SUPERUSER 1
+
+USER www-data
 
 WORKDIR /app
