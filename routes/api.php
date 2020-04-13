@@ -29,6 +29,9 @@ $router->group([
 ], static function (Registrar $router) {
     /** @uses \App\Http\Controllers\Auth\AuthController::login() */
     $router->post('login', 'AuthController@login');
+
+    /** @uses \App\Http\Controllers\Auth\AuthController::register() */
+    $router->post('register', 'AuthController@register');
 });
 
 $router->group([
