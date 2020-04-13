@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Domain\Entities\User;
+use App\Domain\ValueObjects\Email;
+use App\Domain\ValueObjects\FullName;
+use App\Exceptions\AuthorizationTokenNotFound;
+use Doctrine\ORM\EntityManagerInterface;
 use Illuminate\Contracts\Auth\Guard;
-use Illuminate\Contracts\Routing\ResponseFactory;
-use Illuminate\Contracts\Translation\Translator;
-use Illuminate\Http\JsonResponse;
+use Ramsey\Uuid\Uuid;
 
 /**
  * Class AuthorizeService
@@ -19,82 +22,93 @@ class AuthService
      * @var Guard
      */
     private $guard;
+
     /**
-     * @var ResponseFactory
+     * @var EntityManagerInterface
      */
-    private $response;
-    /**
-     * @var Translator
-     */
-    private $translator;
+    private $em;
 
     /**
      * AuthorizeService constructor.
      * @param Guard $guard
-     * @param ResponseFactory $response
-     * @param Translator $translator
+     * @param EntityManagerInterface $em
      */
     public function __construct(
         Guard $guard,
-        ResponseFactory $response,
-        Translator $translator
+        EntityManagerInterface $em
     ) {
         $this->guard = $guard;
-        $this->response = $response;
-        $this->translator = $translator;
+        $this->em = $em;
     }
 
     /**
      * @param array $credentials
-     * @return JsonResponse
+     * @return array
+     * @throws AuthorizationTokenNotFound
      */
-    public function authorize(array $credentials): JsonResponse
+    public function authorize(array $credentials): array
     {
         $token = $this->guard->attempt($credentials);
 
         if (! $token) {
-            return $this->response->json([
-                'message' => $this->translator->get('auth.failed'),
-            ], 401);
+            throw new AuthorizationTokenNotFound();
         }
 
-        return $this->respondWithToken($token, $this->guard->factory()->getTTL());
+        return $this->createAuthResponse($token);
+    }
+
+    /**
+     * @param array $data
+     * @return array
+     */
+    public function registerUser(array $data): array
+    {
+        $fullName = new FullName($data['first_name'], $data['last_name']);
+        $email = new Email($data['email']);
+
+        $user = new User(Uuid::uuid4(), $fullName, $email, $data['password']);
+
+        $this->em->persist($user);
+        $this->em->flush();
+
+        $token = $this->guard->tokenById($user->getId());
+
+        return $this->createAuthResponse($token);
+    }
+
+    /**
+     * @return void
+     */
+    public function logout(): void
+    {
+        $this->guard
+            ->logout();
+    }
+
+    /**
+     * @return array
+     */
+    public function refreshToken(): array
+    {
+        $token = $this->guard->refresh();
+
+        return $this->createAuthResponse($token);
     }
 
     /**
      * @param string $token
-     * @param int $minutes
-     * @return JsonResponse
+     * @param string $tokenType
+     * @return array
      */
-    protected function respondWithToken(string $token, int $minutes): JsonResponse
+    private function createAuthResponse(string $token, $tokenType = 'Bearer'): array
     {
-        return $this->response->json([
+        $user = $this->guard->user();
+
+        return [
             'token' => $token,
-            'token_type' => 'Bearer',
-            'expires_in' => $minutes * 60,
-        ], 200);
-    }
-
-    /**
-     * @return JsonResponse
-     */
-    public function logout(): JsonResponse
-    {
-        $this->guard
-            ->logout();
-
-        return $this->response->json([
-            'message' => $this->translator->get('auth.logout'),
-        ]);
-    }
-
-    /**
-     * @return JsonResponse
-     */
-    public function refreshToken(): JsonResponse
-    {
-        $token = $this->guard->refresh();
-
-        return $this->respondWithToken($token, $this->guard->factory()->getTTL());
+            'token_type' => $tokenType,
+            'expires_in' => config('jwt.ttl') * 60,
+            'user' => $user instanceof User ? $user->toArray() : null,
+        ];
     }
 }

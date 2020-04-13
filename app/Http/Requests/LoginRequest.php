@@ -30,4 +30,15 @@ class LoginRequest extends FormRequest
             'password' => 'required|string|min:6',
         ];
     }
+
+    /**
+     * @return array
+     */
+    public function getCredentials(): array
+    {
+        return [
+            'email.email' => $this->get('email'),
+            'password' => $this->get('password'),
+        ];
+    }
 }

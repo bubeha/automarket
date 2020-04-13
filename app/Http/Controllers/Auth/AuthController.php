@@ -2,18 +2,15 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Domain\Entities\User;
-use App\Domain\ValueObjects\Email;
-use App\Domain\ValueObjects\FullName;
+use App\Exceptions\AuthorizationTokenNotFound;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegistrationRequest;
 use App\Services\AuthService;
-use Doctrine\ORM\EntityManagerInterface;
 use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Contracts\Routing\ResponseFactory;
+use Illuminate\Contracts\Translation\Translator;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Routing\ResponseFactory;
-use Ramsey\Uuid\Uuid;
 
 /**
  * Class AuthController
@@ -21,14 +18,23 @@ use Ramsey\Uuid\Uuid;
  */
 class AuthController extends Controller
 {
-    /**
-     * @var AuthService
-     */
+    /** @var AuthService */
     private $service;
 
-    public function __construct(AuthService $service)
-    {
+    /** @var ResponseFactory */
+    private $response;
+
+    /** @var Translator */
+    private $translator;
+
+    public function __construct(
+        AuthService $service,
+        ResponseFactory $response,
+        Translator $translator
+    ) {
         $this->service = $service;
+        $this->response = $response;
+        $this->translator = $translator;
     }
 
     /**
@@ -37,31 +43,32 @@ class AuthController extends Controller
      */
     public function login(LoginRequest $request): JsonResponse
     {
-        $credentials = $request->validated();
-        $credentials['email.email'] = $credentials['email'];
+        $credentials = $request->getCredentials();
 
-        unset($credentials['email']);
+        try {
+            $result = $this->service->authorize($credentials);
+        } catch (AuthorizationTokenNotFound $exception) {
+            return $this->response->json([
+                'message' => $this->translator->get('auth.failed'),
+            ], 401);
+        }
 
-        return $this->service->authorize($credentials);
+        return $this->response
+            ->json($result);
     }
 
     /**
      * @param RegistrationRequest $request
-     * @return void
+     * @return JsonResponse
      */
-    public function register(RegistrationRequest $request)
+    public function register(RegistrationRequest $request): JsonResponse
     {
         $data = $request->validated();
 
-        $em = app(EntityManagerInterface::class);
+        $result = $this->service->registerUser($data);
 
-        $fullName = new FullName($data['first_name'], $data['last_name']);
-        $email = new Email($data['email']);
-
-        $user = new User(Uuid::uuid4(), $fullName, $email, $data['password']);
-
-        $em->persist($user);
-        $em->flush();
+        return $this->response
+            ->json($result);
     }
 
     /**
@@ -69,7 +76,12 @@ class AuthController extends Controller
      */
     public function logout(): JsonResponse
     {
-        return $this->service->logout();
+        $this->service->logout();
+
+        return $this->response
+            ->json([
+                'message' => $this->translator->get('auth.logout'),
+            ]);
     }
 
     /**
@@ -77,16 +89,21 @@ class AuthController extends Controller
      */
     public function refreshToken(): JsonResponse
     {
-        return $this->service->refreshToken();
+        $result = $this->service->refreshToken();
+
+        return $this->response
+            ->json($result);
     }
 
     /**
      * @param Authenticatable $user
-     * @param ResponseFactory $response
      * @return JsonResponse
      */
-    public function getAccountData(Authenticatable $user, ResponseFactory $response): JsonResponse
+    public function getAccountData(Authenticatable $user): JsonResponse
     {
-        return $response->json($user);
+        return $this->response
+            ->json([
+                'user' => $user,
+            ]);
     }
 }
