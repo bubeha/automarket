@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Domain\Entities\User as UserEntity;
 use App\Domain\ValueObjects\Email;
 use App\Domain\ValueObjects\FullName;
-use App\User;
+use App\ReadModels\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Illuminate\Contracts\Hashing\Hasher;
 use Illuminate\Database\Seeder;
