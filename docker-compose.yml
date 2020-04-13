@@ -15,7 +15,6 @@ services:
       - backend
 
   fpm:
-#    user: "${USER_ID:-1000}:${GROUP_ID:-1000}"
     build:
       context: ./.docker
       dockerfile: fpm.dockerfile
@@ -31,7 +30,6 @@ services:
       PHP_IDE_CONFIG: "serverName=Docker"
 
   cli:
-#    user: "${USER_ID:-1000}:${GROUP_ID:-1000}"
     build:
       context: ./.docker
       dockerfile: cli.dockerfile
@@ -45,6 +43,8 @@ services:
 
   postgres:
     image: postgres:11.2-alpine
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
     environment:
       POSTGRES_USER: forge
       POSTGRES_PASSWORD: secret
@@ -61,3 +61,6 @@ networks:
       driver: default
       config:
         - subnet: 192.166.220.0/16
+
+volumes:
+  postgres-data:
